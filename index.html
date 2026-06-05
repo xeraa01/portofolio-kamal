@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kamaluddin Haqani | 3D Geometric Portfolio & AI Center</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@200;300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js Library for 3D Graphics -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        dark: {
+                            pure: '#000000',
+                            deep: '#050507',
+                            card: '#0a0a0d',
+                            border: '#16161a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000000; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f1f23; 
+            border-radius: 0px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ffffff; 
+        }
+
+        /* Triangular mask wrapper following the user's reference image "Minimalist Wallpaper.jpg" */
+        .triangle-frame-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .triangle-frame {
+            width: 160px;
+            height: 160px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            position: relative;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+
+        .triangle-frame::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.95) 100%);
+            z-index: 2;
+        }
+
+        .triangle-frame:hover {
+            transform: translateY(-8px) scale(1.03);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.05);
+        }
+
+        /* Glass Panel Aesthetic */
+        .cyber-panel {
+            background: rgba(5, 5, 7, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        /* Reveal animations on scroll */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Winbox Simulator Styling */
+        .winbox-window {
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+        .winbox-tab-active {
+            background-color: #2a2a30;
+            color: #ffffff;
+            border-bottom: 2px solid #ffffff;
+        }
+    </style>
+</head>
+<body class="bg-dark-pure text-zinc-400 font-sans antialiased overflow-x-hidden selection:bg-white selection:text-black">
+
+    <!-- Full-screen 3D interactive Canvas Background -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <canvas id="canvas-3d" class="absolute inset-0 w-full h-full"></canvas>
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,#000000_95%)]"></div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="fixed w-full z-50 bg-black/50 backdrop-blur-md border-b border-white/5 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 sm:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex-shrink-0">
+                    <a href="#" class="font-display text-base font-bold tracking-[0.2em] text-white flex items-center gap-3">
+                        <span class="w-1.5 h-1.5 bg-white"></span>
+                        KAMALUDDIN <span class="text-zinc-500 font-light">HAQANI</span>
+                    </a>
+                </div>
+                <!-- Desktop Navigation Links -->
+                <div class="hidden md:flex items-center space-x-2">
+                    <a href="#beranda" class="px-3 py-2 text-[10px] font-mono tracking-widest text-zinc-400 hover:text-white transition">01// HOME</a>
+                    <a href="#tentang" class="px-3 py-2 text-[10px] font-mono tracking-widest text-zinc-400 hover:text-white transition">02// PROFILE & SKILLS</a>
+                    <a href="#projek-section" class="px-3 py-2 text-[10px] font-mono tracking-widest text-zinc-400 hover:text-white transition">03// PROJECTS</a>
+                    <a href="#winbox-section" class="px-3 py-2 text-[10px] font-mono tracking-widest text-zinc-400 hover:text-white transition">04// WINBOX SIM</a>
+                    <a href="#riwayat" class="px-3 py-2 text-[10px] font-mono tracking-widest text-zinc-400 hover:text-white transition">05// HISTORY</a>
+                    <a href="#kontak" class="ml-4 px-5 py-2.5 bg-white text-black font-mono text-[9px] tracking-widest font-bold uppercase hover:bg-zinc-200 transition">
+                        CONTACT &gt;
+                    </a>
+                </div>
+                <!-- Mobile Navigation Toggle -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-white hover:text-zinc-400 p-2">
+                        <i class="fas fa-bars text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-black/95 backdrop-blur-xl border-t border-white/5 absolute w-full left-0 py-6 px-6">
+            <div class="flex flex-col space-y-4">
+                <a href="#beranda" class="text-[10px] font-mono tracking-widest text-zinc-400 py-2">01// HOME</a>
+                <a href="#tentang" class="text-[10px] font-mono tracking-widest text-zinc-400 py-2">02// PROFILE & SKILLS</a>
+                <a href="#projek-section" class="text-[10px] font-mono tracking-widest text-zinc-400 py-2">03// PROJECTS</a>
+                <a href="#winbox-section" class="text-[10px] font-mono tracking-widest text-zinc-400 py-2">04// WINBOX SIM</a>
+                <a href="#riwayat" class="text-[10px] font-mono tracking-widest text-zinc-400 py-2">05// HISTORY</a>
+                <a href="#kontak" class="w-full text-center py-3 bg-white text-black font-mono text-[10px] font-bold tracking-widest">CONTACT &gt;</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero / Landing Section -->
+    <section id="beranda" class="relative min-h-screen flex flex-col justify-center items-center px-6 z-10 pt-24 pb-12">
+        <div class="max-w-4xl w-full text-center space-y-8">
+            
+            <!-- Triangular Layout based directly on Minimalist Wallpaper.jpg -->
+            <div class="triangle-frame-container py-4">
+                <div class="triangle-frame hidden sm:block">
+                    <div class="absolute inset-0 bg-gradient-to-b from-zinc-900/50 to-black"></div>
+                    <div class="absolute bottom-3 left-0 right-0 text-[8px] font-mono tracking-widest text-white/30">NODE_01</div>
+                </div>
+                <div class="triangle-frame scale-110 border-white/20">
+                    <div class="absolute inset-0 bg-gradient-to-b from-zinc-800/40 to-black"></div>
+                    <div class="absolute bottom-3 left-0 right-0 text-[9px] font-mono tracking-widest text-white/80">SYS_CORE</div>
+                </div>
+                <div class="triangle-frame hidden sm:block">
+                    <div class="absolute inset-0 bg-gradient-to-b from-zinc-900/50 to-black"></div>
+                    <div class="absolute bottom-3 left-0 right-0 text-[8px] font-mono tracking-widest text-white/30">NODE_02</div>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <p class="text-[9px] font-mono tracking-[0.4em] text-zinc-500 uppercase">// INFRASTRUKTUR JARINGAN & IT PORTFOLIO</p>
+                <h1 class="font-display text-4xl sm:text-6xl font-light text-white tracking-tight leading-none">
+                    KAMALUDDIN <span class="font-bold block sm:inline text-zinc-100">HAQANI</span>
+                </h1>
+                <p class="font-mono text-xs sm:text-sm text-zinc-400 max-w-xl mx-auto flex items-center justify-center gap-2">
+                    <span class="text-white">&gt;</span> <span id="typing-text">Junior Network Administrator</span><span class="animate-pulse">|</span>
+                </p>
+            </div>
+
+            <div class="w-24 h-[1px] bg-gradient-to-r from-transparent via-zinc-500 to-transparent mx-auto my-6"></div>
+
+            <p class="text-zinc-500 text-xs sm:text-sm max-w-xl mx-auto font-light leading-relaxed">
+                Mahasiswa Teknik Komputer di Universitas Duta Bangsa Surakarta yang berfokus mendalami dunia infrastruktur jaringan, konfigurasi perangkat jaringan lokal, virtualisasi, serta IT Support.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center pt-2">
+                <a href="#tentang" class="px-6 py-3 bg-white text-black font-mono text-[10px] tracking-widest font-bold hover:bg-zinc-200 transition transform hover:-translate-y-0.5">
+                    TELUSURI PROFIL
+                </a>
+                <a href="#projek-section" class="px-6 py-3 bg-black border border-white/10 text-white font-mono text-[10px] tracking-widest font-bold hover:border-white transition transform hover:-translate-y-0.5">
+                    LIHAT PROYEK_
+                </a>
+            </div>
+        </div>
+
+        <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2">
+            <span class="text-[8px] font-mono tracking-[0.2em] text-zinc-600 uppercase">Scroll Down</span>
+            <div class="w-[1px] h-10 bg-gradient-to-b from-zinc-500 to-transparent animate-bounce"></div>
+        </div>
+    </section>
+
+    <!-- Profile / Tentang Section -->
+    <section id="tentang" class="py-24 relative z-10 border-t border-white/5 bg-black/40">
+        <div class="max-w-7xl mx-auto px-6 sm:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+                
+                <!-- Left Details Info -->
+                <div class="lg:col-span-5 space-y-6 reveal">
+                    <div class="space-y-2">
+                        <p class="text-[10px] font-mono tracking-widest text-zinc-500">// 02 // PROFILE OVERVIEW</p>
+                        <h2 class="font-display text-3xl font-bold text-white tracking-tight">Ringkasan Profil</h2>
+                        <div class="w-12 h-[2px] bg-white"></div>
+                    </div>
+                    
+                    <p class="text-zinc-400 text-xs sm:text-sm leading-relaxed text-justify">
+                        Saya adalah mahasiswa semester 3 Program Studi <strong class="text-white font-medium">D3-Teknik Komputer</strong> di <strong class="text-white font-medium">Universitas Duta Bangsa Surakarta</strong>. Memiliki minat yang tinggi untuk terus belajar dan berkembang di bidang teknologi serta administrasi jaringan komputer.
+                    </p>
+                    <p class="text-zinc-400 text-xs sm:text-sm leading-relaxed text-justify">
+                        Saya juga aktif berorganisasi di lingkungan kampus sebagai anggota <strong class="text-white font-medium">Divisi Media dan Humas Himpunan Mahasiswa</strong> selama kurang lebih satu tahun. Berbekal karakter yang mudah beradaptasi, mampu bekerja sama dengan tim, serta memiliki semangat belajar yang tinggi untuk terus mengembangkan keterampilan teknis secara konsisten.
+                    </p>
+                </div>
+
+                <!-- Right Skill Categories (Derived directly from CV table) -->
+                <div class="lg:col-span-7 space-y-6 reveal">
+                    <div class="space-y-2">
+                        <p class="text-[10px] font-mono tracking-widest text-zinc-500">// CAPABILITIES INDEX</p>
+                        <h2 class="font-display text-2xl font-bold text-white tracking-tight">Keahlian & Penguasaan Tools</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        
+                        <!-- Jaringan & IT Support -->
+                        <div class="cyber-panel p-5 border border-white/5 relative group hover:border-white/10 transition-all">
+                            <div class="absolute top-0 right-0 p-3 font-mono text-[8px] text-zinc-600">NET_01</div>
+                            <div class="space-y-3">
+                                <h3 class="font-display font-bold text-white text-xs uppercase tracking-wider flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 bg-blue-400 rounded-full"></span> Jaringan & IT Support
+                                </h3>
+                                <ul class="text-[11px] text-zinc-400 space-y-1 font-mono">
+                                    <li>- MikroTik Dasar</li>
+                                    <li>- Konfigurasi Winbox</li>
+                                    <li>- Network Security Profile</li>
+                                    <li>- Station Mode & Scan SSID</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Pemrograman & Web -->
+                        <div class="cyber-panel p-5 border border-white/5 relative group hover:border-white/10 transition-all">
+                            <div class="absolute top-0 right-0 p-3 font-mono text-[8px] text-zinc-600">DEV_02</div>
+                            <div class="space-y-3">
+                                <h3 class="font-display font-bold text-white text-xs uppercase tracking-wider flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 bg-green-400 rounded-full"></span> Pemrograman & Web
+                                </h3>
+                                <ul class="text-[11px] text-zinc-400 space-y-1 font-mono">
+                                    <li>- HTML dasar & CSS dasar</li>
+                                    <li>- Bahasa C++ dasar</li>
+                                    <li>- Python HTTP Server dasar</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Tools & Virtualization -->
+                        <div class="cyber-panel p-5 border border-white/5 relative group hover:border-white/10 transition-all">
+                            <div class="absolute top-0 right-0 p-3 font-mono text-[8px] text-zinc-600">TOOL_03</div>
+                            <div class="space-y-3">
+                                <h3 class="font-display font-bold text-white text-xs uppercase tracking-wider flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 bg-purple-400 rounded-full"></span> Tools & Virtualization
+                                </h3>
+                                <ul class="text-[11px] text-zinc-400 space-y-1 font-mono">
+                                    <li>- Cloudflare Tunnel (Tunneling)</li>
+                                    <li>- ZeroTier Virtual Network</li>
+                                    <li>- Microsoft Office</li>
+                                    <li>- Canva (Design)</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Soft Skills -->
+                        <div class="cyber-panel p-5 border border-white/5 relative group hover:border-white/10 transition-all">
+                            <div class="absolute top-0 right-0 p-3 font-mono text-[8px] text-zinc-600">SOFT_04</div>
+                            <div class="space-y-3">
+                                <h3 class="font-display font-bold text-white text-xs uppercase tracking-wider flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 bg-amber-400 rounded-full"></span> Soft Skills
+                                </h3>
+                                <ul class="text-[11px] text-zinc-400 space-y-1 font-mono">
+                                    <li>- Komunikasi yang Baik</li>
+                                    <li>- Kerja Sama dalam Tim</li>
+                                    <li>- Manajemen Waktu</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Project Section -->
+    <section id="projek-section" class="py-24 relative z-10 border-t border-white/5 bg-black/60">
+        <div class="max-w-6xl mx-auto px-6 sm:px-8">
+            <div class="text-center mb-16 reveal">
+                <p class="text-[10px] font-mono tracking-widest text-zinc-500 uppercase">// 03 // ACADEMIC PROJECTS & PRACTICES</p>
+                <h2 class="font-display text-3xl font-bold text-white tracking-tight">Proyek & Praktik Akademik</h2>
+                <div class="w-12 h-[2px] bg-white mx-auto mt-3"></div>
+                <p class="mt-3 text-zinc-500 max-w-md mx-auto text-xs leading-relaxed">Berikut adalah daftar lengkap praktik teknis orisinal saya yang diselesaikan selama masa perkuliahan dan praktikum.</p>
+            </div>
+
+            <!-- Project Grid matching exact CV details -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 reveal">
+                
+                <!-- Project 1 (MikroTik Network Config) -->
+                <div class="cyber-panel p-6 border border-white/5 flex flex-col justify-between hover:border-white/20 transition-all duration-300 group">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[8px] font-mono text-zinc-600">NODE_01 // MIKROTIK</span>
+                            <span class="text-[9px] font-mono bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded">Winbox Config</span>
+                        </div>
+                        <h3 class="font-display font-bold text-white text-base">Konfigurasi Jaringan MikroTik</h3>
+                        <p class="text-zinc-500 text-xs leading-relaxed">
+                            Mengkonfigurasi profile keamanan WPA2-PSK, mengatur mode station, memindai SSID lokal, serta menyambungkan perangkat nirkabel menggunakan Winbox. Melakukan konfigurasi DHCP Client, DNS, NAT (Masquerade) untuk distribusi jaringan internet lengkap dengan pengujian ping.
+                        </p>
+                    </div>
+                    <div class="pt-6 border-t border-white/5 mt-6 flex justify-between items-center">
+                        <span class="text-[9px] font-mono text-zinc-400">DHCP / DNS / NAT</span>
+                        <button onclick="triggerWinboxSimulation()" class="text-[9px] font-mono text-blue-400 group-hover:underline flex items-center gap-1">
+                            Simulasi Winbox <i class="fas fa-terminal text-[8px]"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Project 2 (ZeroTier Virtual Network) -->
+                <div class="cyber-panel p-6 border border-white/5 flex flex-col justify-between hover:border-white/20 transition-all duration-300 group">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[8px] font-mono text-zinc-600">NODE_02 // VIRTUALIZATION</span>
+                            <span class="text-[9px] font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded">ZeroTier</span>
+                        </div>
+                        <h3 class="font-display font-bold text-white text-base">ZeroTier Virtual Network</h3>
+                        <p class="text-zinc-500 text-xs leading-relaxed">
+                            Membuat virtual network terenkripsi, mengelola otorisasi perangkat klien (Client Authorization) melalui controller, dan menguji konektivitas VPN peer-to-peer menggunakan alamat IP Virtual ZeroTier disertai pembuatan laporan dokumentasi teknis.
+                        </p>
+                    </div>
+                    <div class="pt-6 border-t border-white/5 mt-6 flex justify-between items-center">
+                        <span class="text-[9px] font-mono text-zinc-400">P2P VPN / ROUTING</span>
+                        <button onclick="triggerZeroTierSimulation()" class="text-[9px] font-mono text-purple-400 group-hover:underline flex items-center gap-1">
+                            Otorisasi Client <i class="fas fa-network-wired text-[8px]"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Project 3 (HTTP Server & Cloudflare Tunnel) -->
+                <div class="cyber-panel p-6 border border-white/5 flex flex-col justify-between hover:border-white/20 transition-all duration-300 group">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[8px] font-mono text-zinc-600">NODE_03 // TUNNELING</span>
+                            <span class="text-[9px] font-mono bg-green-500/10 text-green-400 border border-green-500/20 px-2 py-0.5 rounded">Python & Cloudflare</span>
+                        </div>
+                        <h3 class="font-display font-bold text-white text-base">HTTP Server & Cloudflare Tunnel</h3>
+                        <p class="text-zinc-500 text-xs leading-relaxed">
+                            Merancang landing page sederhana (HTML & CSS), mengoperasikan local HTTP server menggunakan modul bawaan Python, dan melakukan eksposur link internal secara aman ke internet publik menggunakan Cloudflare Tunnel (cloudflared) tanpa port forwarding.
+                        </p>
+                    </div>
+                    <div class="pt-6 border-t border-white/5 mt-6 flex justify-between items-center">
+                        <span class="text-[9px] font-mono text-zinc-400">HTTP / CLOUDFLARED</span>
+                        <button onclick="triggerTunnelSimulation()" class="text-[9px] font-mono text-green-400 group-hover:underline flex items-center gap-1">
+                            Buka Tunnel <i class="fas fa-link text-[8px]"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Custom Simulation Overlays / Modals -->
+    <!-- ZeroTier Simulator Modal -->
+    <div id="zerotier-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4 backdrop-blur-sm">
+        <div class="w-full max-w-lg cyber-panel rounded-lg border border-purple-500/30 overflow-hidden font-mono text-xs">
+            <div class="bg-zinc-950 p-3 border-b border-purple-500/20 flex justify-between items-center">
+                <span class="text-purple-400 flex items-center gap-2"><i class="fas fa-circle-nodes"></i> ZeroTier Central Console v1.12</span>
+                <button onclick="closeModal('zerotier-modal')" class="text-zinc-500 hover:text-white">&times;</button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div class="bg-black/50 p-4 rounded border border-zinc-800 space-y-2">
+                    <p class="text-zinc-500">Network ID: <span class="text-white">e5cd7a99af840211</span></p>
+                    <p class="text-zinc-500">Network Name: <span class="text-white">Kamal_Virtual_Lab</span></p>
+                    <p class="text-zinc-500">Routing Status: <span class="text-green-400 font-bold">ACTIVE</span></p>
+                </div>
+                
+                <div id="zt-sequence" class="space-y-2 bg-black p-3 rounded h-36 overflow-y-auto border border-zinc-900 text-[10px] text-zinc-400">
+                    <p class="text-purple-300">&gt; Klik "Simulasikan Otorisasi" untuk memulai...</p>
+                </div>
+
+                <div class="flex gap-2 justify-end">
+                    <button onclick="closeModal('zerotier-modal')" class="px-4 py-2 border border-zinc-800 text-zinc-400 hover:bg-zinc-900">Batal</button>
+                    <button onclick="runZeroTierSimulation()" class="px-4 py-2 bg-purple-600 text-white hover:bg-purple-500 font-bold">Simulasikan Otorisasi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HTTP Server / Cloudflare Tunnel Simulator Modal -->
+    <div id="tunnel-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4 backdrop-blur-sm">
+        <div class="w-full max-w-lg cyber-panel rounded-lg border border-green-500/30 overflow-hidden font-mono text-xs">
+            <div class="bg-zinc-950 p-3 border-b border-green-500/20 flex justify-between items-center">
+                <span class="text-green-400 flex items-center gap-2"><i class="fas fa-terminal"></i> Terminal Console (HTTP & Tunneling)</span>
+                <button onclick="closeModal('tunnel-modal')" class="text-zinc-500 hover:text-white">&times;</button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div id="tunnel-sequence" class="space-y-2 bg-black p-4 rounded h-48 overflow-y-auto border border-zinc-900 text-[11px] text-zinc-300">
+                    <p class="text-green-500">// Menunggu inisiasi pengguna...</p>
+                </div>
+                <div class="flex gap-2 justify-end">
+                    <button onclick="closeModal('tunnel-modal')" class="px-4 py-2 border border-zinc-800 text-zinc-400 hover:bg-zinc-900">Close</button>
+                    <button onclick="runTunnelSimulation()" class="px-4 py-2 bg-green-600 text-white hover:bg-green-500 font-bold">Inisiasi Server & Tunnel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Winbox Simulator Section -->
+    <section id="winbox-section" class="py-24 relative z-10 border-t border-white/5 bg-black/40">
+        <div class="max-w-5xl mx-auto px-6 sm:px-8">
+            <div class="text-center mb-12 reveal">
+                <p class="text-[10px] font-mono tracking-widest text-zinc-500 uppercase">// 04 // MIKROTIK SIMULATION AND DESIGN CENTER</p>
+                <h2 class="font-display text-3xl font-bold text-white">Winbox Simulator & AI Architect</h2>
+                <div class="w-12 h-[1px] bg-white mx-auto mt-3"></div>
+                <p class="mt-3 text-zinc-500 text-xs max-w-md mx-auto leading-relaxed">
+                    Uji konfigurasi atau gunakan **AI Designer** terintegrasi Gemini untuk merancang skema topologi jaringan secara visual.
+                </p>
+            </div>
+
+            <!-- Winbox Window Component -->
+            <div class="winbox-window cyber-panel rounded-lg border border-zinc-800 bg-zinc-950 overflow-hidden reveal">
+                
+                <!-- Winbox Top Bar / Title -->
+                <div class="bg-zinc-900 px-4 py-2 border-b border-zinc-800 flex justify-between items-center select-none">
+                    <div class="flex items-center gap-2">
+                        <img src="https://placehold.co/16x16/000000/ffffff?text=W" alt="Winbox Icon" class="w-3.5 h-3.5 rounded-sm filter invert" onerror="this.src='https://img.icons8.com/color/48/mikrotik.png'">
+                        <span class="font-mono text-[10px] text-zinc-300 font-medium">Winbox v3.27 on Kamaluddin_Router (x86_64)</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-zinc-700"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-zinc-700"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-zinc-700"></span>
+                    </div>
+                </div>
+
+                <!-- Winbox Connect Setup Panel (Visible if not connected) -->
+                <div id="winbox-login-screen" class="p-8 flex flex-col items-center justify-center min-h-[300px]">
+                    <div class="w-full max-w-sm border border-zinc-800 bg-zinc-900/60 p-6 rounded space-y-4">
+                        <div class="text-center border-b border-zinc-800 pb-3">
+                            <h4 class="font-mono text-xs font-bold text-white">Winbox - Login RouterOS</h4>
+                        </div>
+                        <div class="space-y-3 text-xs font-mono">
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="text-zinc-500">Connect To:</span>
+                                <input type="text" value="192.168.88.1" disabled class="bg-black border border-zinc-800 text-white px-2 py-1 w-44 rounded text-center">
+                            </div>
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="text-zinc-500">Login Name:</span>
+                                <input type="text" value="admin" disabled class="bg-black border border-zinc-800 text-white px-2 py-1 w-44 rounded text-center">
+                            </div>
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="text-zinc-500">Password:</span>
+                                <input type="password" value="********" disabled class="bg-black border border-zinc-800 text-zinc-600 px-2 py-1 w-44 rounded text-center">
+                            </div>
+                        </div>
+                        <button onclick="connectWinbox()" class="w-full py-2 bg-white text-black font-mono text-[10px] font-bold tracking-widest hover:bg-zinc-200 transition mt-2">
+                            CONNECT TO ROUTER
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Winbox Main Router Dashboard Interface (Hidden by default) -->
+                <div id="winbox-main-dashboard" class="hidden min-h-[350px] flex flex-col md:flex-row">
+                    
+                    <!-- Left Navigation Sidebar inside Winbox -->
+                    <div class="w-full md:w-36 bg-zinc-900 border-r border-zinc-800 flex md:flex-col text-[10px] font-mono select-none overflow-x-auto md:overflow-x-visible">
+                        <div class="hidden md:block p-3 border-b border-zinc-800 text-zinc-500 text-[8px] uppercase tracking-wider">RouterOS Menu</div>
+                        <button onclick="switchWinboxTab('quickset')" id="tab-quickset" class="px-3 py-3 md:py-2 text-left hover:bg-zinc-800 text-zinc-300 flex items-center gap-2 winbox-tab-active shrink-0">
+                            <i class="fas fa-sliders-h text-zinc-500"></i> Quick Set
+                        </button>
+                        <button onclick="switchWinboxTab('interfaces')" id="tab-interfaces" class="px-3 py-3 md:py-2 text-left hover:bg-zinc-800 text-zinc-300 flex items-center gap-2 shrink-0">
+                            <i class="fas fa-network-wired text-zinc-500"></i> Interfaces
+                        </button>
+                        <button onclick="switchWinboxTab('queues')" id="tab-queues" class="px-3 py-3 md:py-2 text-left hover:bg-zinc-800 text-zinc-300 flex items-center gap-2 shrink-0">
+                            <i class="fas fa-chart-line text-zinc-500"></i> Queues
+                        </button>
+                        <button onclick="switchWinboxTab('system')" id="tab-system" class="px-3 py-3 md:py-2 text-left hover:bg-zinc-800 text-zinc-300 flex items-center gap-2 shrink-0">
+                            <i class="fas fa-server text-zinc-500"></i> System Info
+                        </button>
+                        <!-- AI Topology Architect Tab -->
+                        <button onclick="switchWinboxTab('ai-designer')" id="tab-ai-designer" class="px-3 py-3 md:py-2 text-left hover:bg-zinc-800 text-zinc-300 flex items-center gap-2 bg-purple-950/20 text-purple-400 border-b border-purple-500/30 md:border-b-0 md:border-l-2 md:border-purple-500 shrink-0">
+                            <i class="fas fa-brain text-purple-400 animate-pulse"></i> AI Designer
+                        </button>
+                        <button onclick="disconnectWinbox()" class="md:mt-auto px-3 py-3 md:py-3 border-t border-zinc-800 text-left text-red-500 hover:bg-red-950/20 flex items-center gap-2 shrink-0">
+                            <i class="fas fa-sign-out-alt"></i> Out
+                        </button>
+                    </div>
+
+                    <!-- Right Main Work Area inside Winbox -->
+                    <div class="flex-1 bg-zinc-950 p-6 overflow-y-auto text-xs font-mono min-h-[320px]">
+                        
+                        <!-- TAB CONTENT: QUICK SET -->
+                        <div id="content-quickset" class="space-y-4">
+                            <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
+                                <h5 class="text-white font-bold text-[11px] uppercase tracking-wider">&gt; Quick Set Status: Connected</h5>
+                                <span class="bg-green-500/10 text-green-400 border border-green-500/20 text-[9px] px-2 py-0.5 rounded">ONLINE</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                                <div class="bg-zinc-900/40 p-4 border border-zinc-800 rounded space-y-2">
+                                    <span class="text-zinc-500 text-[9px]">ROUTER IDENTITY</span>
+                                    <p class="text-white font-bold">Kamaluddin_Router</p>
+                                    <span class="text-zinc-500 text-[9px] block pt-2">FIRMWARE VERSION</span>
+                                    <p class="text-zinc-300">RouterOS v7.1</p>
+                                </div>
+                                <div class="bg-zinc-900/40 p-4 border border-zinc-800 rounded space-y-2">
+                                    <span class="text-zinc-500 text-[9px]">UDB LOCAL NETWORK IP</span>
+                                    <p class="text-white font-bold">192.168.88.1 / 24</p>
+                                    <span class="text-zinc-500 text-[9px] block pt-2">DHCP CLIENT STATUS</span>
+                                    <p class="text-green-400 font-semibold">Active & Distributing</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB CONTENT: INTERFACES -->
+                        <div id="content-interfaces" class="hidden space-y-4">
+                            <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
+                                <h5 class="text-white font-bold text-[11px] uppercase tracking-wider">&gt; Interface List</h5>
+                                <span class="text-zinc-500 text-[9px]">3 interfaces active</span>
+                            </div>
+                            
+                            <!-- Custom Simulated Console Log for MikroTik scanning and pinging -->
+                            <div id="mikrotik-logs" class="bg-black p-3 rounded border border-zinc-900 text-[10px] text-zinc-400 hidden space-y-1 mb-2">
+                                <p class="text-blue-400 font-bold">&gt;_ Winbox Terminal Logs:</p>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-[11px]">
+                                    <thead>
+                                        <tr class="border-b border-zinc-800 text-zinc-500">
+                                            <th class="pb-2">Name</th>
+                                            <th class="pb-2">Type</th>
+                                            <th class="pb-2">Actual IP</th>
+                                            <th class="pb-2">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-zinc-900">
+                                        <tr class="text-zinc-300">
+                                            <td class="py-2.5 font-bold text-white">ether1-wan</td>
+                                            <td class="py-2.5 text-zinc-500">Ethernet</td>
+                                            <td class="py-2.5">10.21.24.1</td>
+                                            <td class="py-2.5 text-green-400">Connected (DHCP Client)</td>
+                                        </tr>
+                                        <tr class="text-zinc-300">
+                                            <td class="py-2.5 font-bold text-white">ether2-local</td>
+                                            <td class="py-2.5 text-zinc-500">Ethernet</td>
+                                            <td class="py-2.5">192.168.88.1</td>
+                                            <td class="py-2.5 text-green-400">Active (UDB Net)</td>
+                                        </tr>
+                                        <tr class="text-zinc-300">
+                                            <td class="py-2.5 font-bold text-white">wlan1-station</td>
+                                            <td class="py-2.5 text-zinc-500">Wireless AP</td>
+                                            <td class="py-2.5">172.16.1.1</td>
+                                            <td class="py-2.5 text-green-400">Associated (WPA2-PSK)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- TAB CONTENT: QUEUES -->
+                        <div id="content-queues" class="hidden space-y-4">
+                            <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
+                                <h5 class="text-white font-bold text-[11px] uppercase tracking-wider">&gt; Simple Queues (Bandwidth Limiter)</h5>
+                                <span class="text-zinc-500 text-[9px]">1 Policy Configured</span>
+                            </div>
+                            
+                            <div class="bg-zinc-900/40 p-4 border border-zinc-800 rounded space-y-4">
+                                <div class="flex justify-between text-[11px] text-zinc-300">
+                                    <span>Queue Name: <strong class="text-white">Kamal_Core_Limit</strong></span>
+                                    <span>Target: <strong class="text-white">192.168.88.0/24</strong></span>
+                                </div>
+                                
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-[10px] text-zinc-500">
+                                        <span>Download (Limit: 100 Mbps)</span>
+                                        <span id="download-speed-val" class="text-white font-mono">62.4 Mbps</span>
+                                    </div>
+                                    <div class="w-full bg-zinc-950 border border-zinc-800 h-2 p-0.5 rounded-sm">
+                                        <div id="download-bar" class="bg-white h-full transition-all duration-500" style="width: 62.4%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-[10px] text-zinc-500">
+                                        <span>Upload (Limit: 50 Mbps)</span>
+                                        <span id="upload-speed-val" class="text-white font-mono">24.1 Mbps</span>
+                                    </div>
+                                    <div class="w-full bg-zinc-950 border border-zinc-800 h-2 p-0.5 rounded-sm">
+                                        <div id="upload-bar" class="bg-zinc-500 h-full transition-all duration-500" style="width: 48%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB CONTENT: SYSTEM INFO -->
+                        <div id="content-system" class="hidden space-y-4">
+                            <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
+                                <h5 class="text-white font-bold text-[11px] uppercase tracking-wider">&gt; System Resources</h5>
+                                <span class="text-zinc-500 text-[9px]">Hardware Diagnostics</span>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="border border-zinc-800 bg-zinc-900/20 p-3 space-y-1">
+                                    <span class="text-zinc-500 text-[9px]">PLATFORM / ARCHITECTURE</span>
+                                    <p class="text-zinc-300 font-bold">MikroTik RouterBOARD</p>
+                                </div>
+                                <div class="border border-zinc-800 bg-zinc-900/20 p-3 space-y-1">
+                                    <span class="text-zinc-500 text-[9px]">TOTAL MEMORY</span>
+                                    <p class="text-zinc-300 font-bold">2048 MB</p>
+                                </div>
+                                <div class="border border-zinc-800 bg-zinc-900/20 p-3 space-y-1">
+                                    <span class="text-zinc-500 text-[9px]">CPU LOAD / HEALTH</span>
+                                    <p class="text-zinc-300 font-bold flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> 2% to 15% (Optimal)
+                                    </p>
+                                </div>
+                                <div class="border border-zinc-800 bg-zinc-900/20 p-3 space-y-1">
+                                    <span class="text-zinc-500 text-[9px]">SYSTEM UPTIME</span>
+                                    <p class="text-zinc-300 font-bold">3d 12h 43m 10s</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB CONTENT: AI DESIGNER -->
+                        <div id="content-ai-designer" class="hidden space-y-4">
+                            <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
+                                <h5 class="text-purple-400 font-bold text-[11px] uppercase tracking-wider">&gt; AI Network Topology Designer</h5>
+                                <span class="bg-purple-500/15 text-purple-300 border border-purple-500/30 text-[9px] px-2 py-0.5 rounded">GEMINI ENGINE</span>
+                            </div>
+                            <p class="text-[10px] text-zinc-400 leading-relaxed">
+                                Manfaatkan integrasi kecerdasan buatan **Gemini Imagen** untuk membuat visual topologi jaringan Anda secara instan dan estetik.
+                            </p>
+                            
+                            <div class="space-y-3">
+                                <div class="flex flex-col sm:flex-row gap-2">
+                                    <input type="text" id="topology-prompt" placeholder="Skenario: 'Blue network topology diagram blueprint isometric icons'..." class="flex-1 bg-black border border-zinc-800 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500 transition-colors">
+                                    <button onclick="generateTopology()" id="btn-generate-topology" class="px-5 py-2 bg-purple-600 hover:bg-purple-500 text-white font-mono text-[10px] font-bold tracking-widest transition rounded uppercase">
+                                        GENERATE
+                                    </button>
+                                </div>
+                                
+                                <div class="flex gap-2 flex-wrap">
+                                    <button onclick="setTopologyPrompt('Minimalist high-tech local area network diagram schematic vector')" class="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 px-2 py-1 text-[9px] rounded text-zinc-400"># Sederhana (LAN)</button>
+                                    <button onclick="setTopologyPrompt('Isometric enterprise data center server room network architecture illustration')" class="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 px-2 py-1 text-[9px] rounded text-zinc-400"># Enterprise (Isometric)</button>
+                                    <button onclick="setTopologyPrompt('Secure hybrid cloud network architecture diagram clean blueprint')" class="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 px-2 py-1 text-[9px] rounded text-zinc-400"># Cloud Hybrid</button>
+                                </div>
+
+                                <!-- Output Box for generated topology -->
+                                <div id="topology-output-container" class="border border-zinc-800 bg-zinc-900/20 rounded p-4 min-h-[220px] flex items-center justify-center relative overflow-hidden">
+                                    <div id="topology-placeholder" class="text-center space-y-2 text-zinc-600">
+                                        <i class="fas fa-network-wired text-3xl"></i>
+                                        <p class="text-[10px] font-mono">Tulis deskripsi atau klik label template di atas untuk merancang diagram visual.</p>
+                                    </div>
+                                    <img id="topology-img" class="hidden w-full h-auto max-h-[300px] object-contain rounded border border-zinc-800 shadow-2xl" alt="Generated network topology">
+                                    <div id="topology-loading" class="hidden absolute inset-0 bg-black/90 flex flex-col items-center justify-center space-y-3">
+                                        <i class="fas fa-brain fa-spin text-purple-400 text-2xl"></i>
+                                        <p class="text-[10px] font-mono text-zinc-300">Gemini sedang menyusun arsitektur topologi...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Education & Organization Timeline Section -->
+    <section id="riwayat" class="py-24 relative z-10 border-t border-white/5 bg-black/40">
+        <div class="max-w-4xl mx-auto px-6 sm:px-8">
+            <div class="text-center mb-16 reveal">
+                <p class="text-[10px] font-mono tracking-widest text-zinc-500">// 05 // HISTORY MAP</p>
+                <h2 class="font-display text-3xl font-bold text-white tracking-tight">Pendidikan & Organisasi</h2>
+                <div class="w-12 h-[2px] bg-white mx-auto mt-3"></div>
+            </div>
+
+            <!-- Vertical Timeline Container -->
+            <div class="relative border-l border-zinc-800 ml-2 sm:ml-4 space-y-12">
+                
+                <!-- Education Node 1 -->
+                <div class="relative pl-6 sm:pl-8 group reveal">
+                    <div class="absolute -left-[4.5px] top-1.5 w-2 h-2 bg-black border border-white transition-all duration-300 group-hover:scale-125"></div>
+                    <div class="cyber-panel p-6 sm:p-8 border border-white/5 group-hover:border-white/10 transition-all duration-300">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                            <div>
+                                <span class="text-[9px] font-mono text-zinc-500">2025 - SEKARANG</span>
+                                <h3 class="font-display text-lg font-bold text-white mt-0.5">Universitas Duta Bangsa Surakarta</h3>
+                                <p class="text-[10px] font-mono text-zinc-400 mt-0.5">D3 - Teknik Komputer (Semester 3)</p>
+                            </div>
+                            <span class="inline-flex border border-zinc-800 text-zinc-400 text-[9px] font-mono px-3 py-1 bg-zinc-950 w-fit rounded">ACTIVE NODE</span>
+                        </div>
+                        <p class="text-zinc-500 text-xs leading-relaxed font-light">
+                            Mengembangkan keahlian praktis dan teoritis di bidang teknologi komputer dengan fokus intensif pada administrasi, keamanan, dan perancangan infrastruktur jaringan modern.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Organization Node 2 -->
+                <div class="relative pl-6 sm:pl-8 group reveal">
+                    <div class="absolute -left-[4.5px] top-1.5 w-2 h-2 bg-black border border-white transition-all duration-300 group-hover:scale-125"></div>
+                    <div class="cyber-panel p-6 sm:p-8 border border-white/5 group-hover:border-white/10 transition-all duration-300">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                            <div>
+                                <span class="text-[9px] font-mono text-zinc-500">DURASI: ± 1 TAHUN</span>
+                                <h3 class="font-display text-lg font-bold text-white mt-0.5">Himpunan Mahasiswa</h3>
+                                <p class="text-[10px] font-mono text-zinc-400 mt-0.5">Divisi Media dan Humas</p>
+                            </div>
+                            <span class="inline-flex border border-zinc-800 text-zinc-400 text-[9px] font-mono px-3 py-1 bg-zinc-950 w-fit rounded">COMPLETED</span>
+                        </div>
+                        <p class="text-zinc-500 text-xs leading-relaxed font-light">
+                            Aktif berpartisipasi merancang strategi publikasi digital kegiatan himpunan, koordinasi taktis media sosial, mengasah kemampuan kerja sama tim, manajemen waktu, serta komunikasi secara andal.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Education Node 3 -->
+                <div class="relative pl-6 sm:pl-8 group reveal">
+                    <div class="absolute -left-[4.5px] top-1.5 w-2 h-2 bg-black border border-white transition-all duration-300 group-hover:scale-125"></div>
+                    <div class="cyber-panel p-6 sm:p-8 border border-white/5 group-hover:border-white/10 transition-all duration-300">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                            <div>
+                                <span class="text-[9px] font-mono text-zinc-500">2021 - 2024</span>
+                                <h3 class="font-display text-lg font-bold text-white mt-0.5">SMK Al Musanni Gemolong</h3>
+                                <p class="text-[10px] font-mono text-zinc-400 mt-0.5">Teknik Kendaraan Ringan Otomotif</p>
+                            </div>
+                            <span class="inline-flex border border-zinc-800 text-zinc-500 text-[9px] font-mono px-3 py-1 bg-zinc-950 w-fit rounded">COMPLETED</span>
+                        </div>
+                        <p class="text-zinc-500 text-xs leading-relaxed font-light">
+                            Menempuh pelatihan dasar yang berorientasi pada ketelitian analisis kesalahan mekanis, kedisiplinan kerja industri, dan pemecahan masalah teknis yang terstruktur.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="kontak" class="py-24 relative z-10 border-t border-white/5 bg-black/60">
+        <div class="max-w-7xl mx-auto px-6 sm:px-8">
+            <div class="text-center mb-16 reveal">
+                <p class="text-[10px] font-mono tracking-widest text-zinc-500">// 06 // REACH OUT</p>
+                <h2 class="font-display text-3xl font-bold text-white tracking-tight">Hubungi Saya</h2>
+                <div class="w-12 h-[2px] bg-white mx-auto mt-3"></div>
+                <p class="mt-3 text-zinc-500 max-w-sm mx-auto text-xs leading-relaxed">Silakan gunakan salah satu saluran di bawah ini untuk berdiskusi, menawarkan peluang kolaborasi profesional, atau wawancara kerja.</p>
+            </div>
+
+            <!-- Contact Grid with authentic details from CV -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto reveal">
+                
+                <!-- Email Card -->
+                <a href="mailto:250104019@mhs.udb.ac.id" class="cyber-panel p-6 text-center transition-all duration-300 hover:border-white/20 group flex flex-col items-center">
+                    <div class="w-10 h-10 bg-white/5 text-white border border-white/10 flex items-center justify-center text-sm mb-3 group-hover:scale-105 transition-transform">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-white text-xs tracking-wider uppercase mb-1">Email Akademik</h3>
+                    <p class="text-zinc-500 text-[11px] font-mono break-all">250104019@mhs.udb.ac.id</p>
+                    <span class="mt-4 text-[8px] uppercase font-mono tracking-widest text-white/40 group-hover:text-white transition-colors">Kirim Pesan &gt;</span>
+                </a>
+
+                <!-- WhatsApp Card -->
+                <a href="https://wa.me/6287865515963" target="_blank" class="cyber-panel p-6 text-center transition-all duration-300 hover:border-white/20 group flex flex-col items-center">
+                    <div class="w-10 h-10 bg-white/5 text-white border border-white/10 flex items-center justify-center text-sm mb-3 group-hover:scale-105 transition-transform">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-white text-xs tracking-wider uppercase mb-1">WhatsApp</h3>
+                    <p class="text-zinc-500 text-[11px] font-mono">+62 878-6551-5963</p>
+                    <span class="mt-4 text-[8px] uppercase font-mono tracking-widest text-white/40 group-hover:text-white transition-colors">Chat Sekarang &gt;</span>
+                </a>
+
+                <!-- Location Card -->
+                <div class="cyber-panel p-6 text-center border border-white/5 flex flex-col items-center">
+                    <div class="w-10 h-10 bg-white/5 text-white border border-white/10 flex items-center justify-center text-sm mb-3">
+                        <i class="fas fa-location-dot"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-white text-xs tracking-wider uppercase mb-1">Domisili</h3>
+                    <p class="text-zinc-500 text-[11px] font-mono">Tipes, Surakarta<br>Jawa Tengah, Indonesia</p>
+                    <span class="mt-4 text-[8px] uppercase font-mono tracking-widest text-zinc-700">Surakarta Node</span>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Chatbot Trigger Circular Button -->
+    <button id="chatbot-toggle" class="fixed bottom-6 right-6 bg-white text-black hover:bg-zinc-200 shadow-2xl w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-105 z-50 focus:outline-none border border-white/10">
+        <i class="fas fa-robot text-base"></i>
+    </button>
+
+    <!-- AI Geometric Chatbot Window -->
+    <div id="chatbot-window" class="fixed bottom-20 right-6 w-[320px] sm:w-[350px] bg-black border border-white/10 rounded-lg shadow-2xl hidden flex-col z-50 overflow-hidden transition-all duration-300">
+        
+        <!-- Header -->
+        <div class="bg-zinc-950 p-4 flex justify-between items-center border-b border-white/5">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/5 p-2 border border-white/10 relative">
+                    <i class="fas fa-terminal text-white text-[10px]"></i>
+                    <span class="absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                </div>
+                <div>
+                    <h3 class="font-display font-bold text-[11px] text-white uppercase tracking-wider">Kamaluddin Assist AI</h3>
+                    <div class="flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                        <p class="text-[7px] font-mono text-green-400" id="chatbot-engine-status">LIVE GEMINI API</p>
+                    </div>
+                </div>
+            </div>
+            <button id="chatbot-close" class="text-zinc-500 hover:text-white transition">
+                <i class="fas fa-times text-xs"></i>
+            </button>
+        </div>
+        
+        <!-- Messages Area -->
+        <div id="chat-history" class="p-4 h-64 overflow-y-auto flex flex-col gap-3 bg-zinc-950/40 text-[11px]">
+            <div class="self-start bg-zinc-900/80 border border-white/5 text-zinc-300 p-2.5 rounded max-w-[85%] leading-relaxed font-light">
+                Halo! Saya asisten virtual Kamaluddin bertenaga **Google Gemini API**. Saya siap menjawab pertanyaan detail mengenai latar belakang, kemampuan jaringan, serta projek Kamaluddin sesuai berkas CV resminya. Silakan ajukan pertanyaan Anda!
+            </div>
+        </div>
+
+        <!-- Suggestion Question Chips -->
+        <div class="px-3 py-2 border-t border-white/5 bg-black flex flex-wrap gap-1 max-h-20 overflow-y-auto">
+            <button onclick="sendQuickMessage('Apa saja proyek dan praktik akademik Kamal?')" class="border border-white/5 hover:border-white text-[8px] font-mono text-zinc-500 hover:text-white px-2 py-0.5 rounded transition">_proyek_kamal</button>
+            <button onclick="sendQuickMessage('Sebutkan keahlian utama dan tools Kamaluddin!')" class="border border-white/5 hover:border-white text-[8px] font-mono text-zinc-500 hover:text-white px-2 py-0.5 rounded transition">_keahlian</button>
+            <button onclick="sendQuickMessage('Kamal kuliah di mana dan angkatan berapa?')" class="border border-white/5 hover:border-white text-[8px] font-mono text-zinc-500 hover:text-white px-2 py-0.5 rounded transition">_kuliah</button>
+            <button onclick="sendQuickMessage('Ceritakan tentang proyek ZeroTier yang dikerjakan!')" class="border border-white/5 hover:border-white text-[8px] font-mono text-zinc-500 hover:text-white px-2 py-0.5 rounded transition">_zerotier</button>
+        </div>
+
+        <!-- Chat Input Form Area -->
+        <div class="p-2 border-t border-white/5 bg-zinc-950 flex gap-2 items-center font-mono">
+            <input type="text" id="chat-input" placeholder="Tanyakan seputar CV & projek..." class="flex-1 bg-black border border-white/5 rounded-none px-3 py-2 text-[11px] text-white focus:outline-none focus:border-white/20 transition-colors">
+            <button id="chat-send" class="bg-white text-black hover:bg-zinc-200 w-8 h-8 flex items-center justify-center transition-colors">
+                <i class="fas fa-paper-plane text-[10px]"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="bg-black border-t border-white/5 text-zinc-600 py-10 text-center relative z-10">
+        <div class="max-w-7xl mx-auto px-6 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="text-[9px] font-mono uppercase tracking-widest">&copy; <span id="year"></span> Kamaluddin Haqani. Verified Professional CV Portfolio.</p>
+            <div class="flex gap-4 text-xs">
+                <a href="https://wa.me/6287865515963" target="_blank" class="hover:text-white transition"><i class="fab fa-whatsapp"></i></a>
+                <a href="mailto:250104019@mhs.udb.ac.id" class="hover:text-white transition"><i class="fas fa-envelope"></i></a>
+                <span class="text-zinc-500 font-mono text-[8px] flex items-center gap-1.5">
+                    <span class="w-1 h-1 bg-green-500 rounded-full animate-pulse"></span> SECURE CONNECTION
+                </span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Set Year in footer
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Mobile Menu toggle logic
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
+        const mobileLinks = menu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                menu.classList.add('hidden');
+            });
+        });
+
+        // Scroll responsive navbar logic
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                navbar.classList.add('bg-black/85', 'shadow-lg');
+                navbar.classList.remove('bg-black/50');
+            } else {
+                navbar.classList.remove('bg-black/85', 'shadow-lg');
+                navbar.classList.add('bg-black/50');
+            }
+        });
+
+        // Scroll Reveal animation trigger
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealOnScroll = () => {
+            const triggerBottom = window.innerHeight * 0.85;
+            revealElements.forEach(el => {
+                const elTop = el.getBoundingClientRect().top;
+                if (elTop < triggerBottom) {
+                    el.classList.add('active');
+                }
+            });
+        };
+        window.addEventListener('scroll', revealOnScroll);
+        window.addEventListener('load', revealOnScroll);
+
+        // Three.js Misty Monochromatic Geometric Mountains Landscape
+        const canvas = document.getElementById('canvas-3d');
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000000, 0.015);
+
+        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 3, 16);
+        camera.lookAt(0, 1.5, 0);
+
+        function resizeRenderer() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        window.addEventListener('resize', resizeRenderer);
+        resizeRenderer();
+
+        // Creating Procedural Wave Ridges
+        const terrainGeo = new THREE.PlaneGeometry(120, 120, 35, 35);
+        const pos = terrainGeo.attributes.position;
+        
+        for (let i = 0; i < pos.count; i++) {
+            const x = pos.getX(i);
+            const y = pos.getY(i);
+            
+            const z = Math.sin(x * 0.08) * Math.cos(y * 0.08) * 3.5 +
+                      Math.sin(x * 0.03) * 5.5 +
+                      Math.cos(y * 0.04) * 3.0;
+            
+            pos.setZ(i, z);
+        }
+        terrainGeo.computeVertexNormals();
+
+        const terrainMat = new THREE.MeshLambertMaterial({
+            color: 0x08080a,
+            flatShading: true,
+            side: THREE.DoubleSide
+        });
+
+        const terrainMesh = new THREE.Mesh(terrainGeo, terrainMat);
+        terrainMesh.rotation.x = -Math.PI / 2;
+        terrainMesh.position.y = -3.5;
+        scene.add(terrainMesh);
+
+        // Wireframe Topological Overlay Layer
+        const wireframeMat = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.06
+        });
+        const wireframeMesh = new THREE.Mesh(terrainGeo, wireframeMat);
+        wireframeMesh.rotation.x = -Math.PI / 2;
+        wireframeMesh.position.y = -3.48;
+        scene.add(wireframeMesh);
+
+        // Floating Geometric Tetrahedrons (Minimalist Triangles in 3D Space)
+        const prismsCount = 3;
+        const prismsArray = [];
+
+        for(let i = 0; i < prismsCount; i++) {
+            const geom = new THREE.TetrahedronGeometry(1.2 + Math.random() * 0.5, 0);
+            const mat = new THREE.MeshPhongMaterial({
+                color: 0x030303,
+                emissive: 0x111111,
+                specular: 0x555555,
+                shininess: 90,
+                flatShading: true,
+                transparent: true,
+                opacity: 0.8
+            });
+            const prism = new THREE.Mesh(geom, mat);
+            
+            prism.position.set(
+                (Math.random() - 0.5) * 16,
+                1.5 + Math.random() * 3,
+                (Math.random() - 0.5) * 8
+            );
+            
+            scene.add(prism);
+            prismsArray.push({
+                mesh: prism,
+                rotSpeedX: (Math.random() - 0.5) * 0.008,
+                rotSpeedY: (Math.random() - 0.5) * 0.008,
+                floatSpeed: 0.004 + Math.random() * 0.004,
+                floatRange: 0.2 + Math.random() * 0.4,
+                initialY: prism.position.y
+            });
+        }
+
+        // Scene Lights setup
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+        dirLight.position.set(10, 15, -10);
+        scene.add(dirLight);
+
+        const pointLight = new THREE.PointLight(0xffffff, 0.6, 60);
+        pointLight.position.set(0, 6, 4);
+        scene.add(pointLight);
+
+        const ambientLight = new THREE.AmbientLight(0x020202);
+        scene.add(ambientLight);
+
+        let mouseX = 0, mouseY = 0;
+        let targetX = 0, targetY = 0;
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - window.innerWidth / 2) * 0.0015;
+            mouseY = (e.clientY - window.innerHeight / 2) * 0.0015;
+        });
+
+        let frameCounter = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            frameCounter += 0.01;
+
+            prismsArray.forEach(p => {
+                p.mesh.rotation.x += p.rotSpeedX;
+                p.mesh.rotation.y += p.rotSpeedY;
+                p.mesh.position.y = p.initialY + Math.sin(frameCounter * 1.5 + p.initialY) * p.floatRange;
+            });
+
+            targetX += (mouseX - targetX) * 0.04;
+            targetY += (mouseY - targetY) * 0.04;
+            
+            camera.position.x = targetX * 10;
+            camera.position.y = 3 + (-targetY * 5);
+            camera.lookAt(0, 1.2, 0);
+
+            terrainMesh.rotation.z = frameCounter * 0.008;
+            wireframeMesh.rotation.z = frameCounter * 0.008;
+
+            renderer.render(scene, camera);
+        }
+
+        window.onload = function() {
+            animate();
+        };
+
+        // Winbox Interactive Simulator Logic
+        const loginScreen = document.getElementById('winbox-login-screen');
+        const mainDashboard = document.getElementById('winbox-main-dashboard');
+        
+        function connectWinbox() {
+            loginScreen.innerHTML = `
+                <div class="flex flex-col items-center justify-center space-y-4">
+                    <i class="fas fa-circle-notch fa-spin text-xl text-white"></i>
+                    <span class="font-mono text-xs text-zinc-400">Negotiating RouterOS handshake with 192.168.88.1...</span>
+                </div>
+            `;
+            setTimeout(() => {
+                loginScreen.classList.add('hidden');
+                mainDashboard.classList.remove('hidden');
+                startUptimeGraph();
+            }, 1200);
+        }
+
+        function triggerWinboxSimulation() {
+            const winboxSection = document.getElementById('winbox-section');
+            winboxSection.scrollIntoView({ behavior: 'smooth' });
+
+            setTimeout(() => {
+                if (mainDashboard.classList.contains('hidden')) {
+                    connectWinbox();
+                }
+                setTimeout(() => {
+                    switchWinboxTab('interfaces');
+                    runMikrotikInterfaceLogs();
+                }, 1300);
+            }, 500);
+        }
+
+        function runMikrotikInterfaceLogs() {
+            const logBox = document.getElementById('mikrotik-logs');
+            logBox.classList.remove('hidden');
+            logBox.innerHTML = '<p class="text-blue-400 font-bold">&gt;_ Winbox Terminal Logs:</p>';
+            
+            const messages = [
+                "Scanning wireless spectrum on wlan1...",
+                "SSID Found: 'UDB_Guest_Campus'",
+                "Applying security profile (WPA2-PSK/AES) to wlan1...",
+                "Interface wlan1 associated successfully.",
+                "Enabling DHCP Client on ether1-wan...",
+                "DHCP Bound! Acquired IP: 10.21.24.1/24",
+                "Adding dynamic DNS server (8.8.8.8)...",
+                "Setting up NAT Masquerade rule on out-interface=ether1-wan...",
+                "Routing established. Testing connection: ping 8.8.8.8...",
+                "Reply from 8.8.8.8: bytes=32 time=12ms TTL=118",
+                "Jaringan berhasil dikonfigurasi & online!"
+            ];
+
+            messages.forEach((msg, idx) => {
+                setTimeout(() => {
+                    const p = document.createElement('p');
+                    p.innerHTML = `<span class="text-zinc-600">[${new Date().toLocaleTimeString()}]</span> ${msg}`;
+                    if (idx === messages.length - 1) p.className = "text-green-400 font-bold";
+                    logBox.appendChild(p);
+                    logBox.scrollTop = logBox.scrollHeight;
+                }, idx * 1000);
+            });
+        }
+
+        function disconnectWinbox() {
+            mainDashboard.classList.add('hidden');
+            loginScreen.classList.remove('hidden');
+            loginScreen.innerHTML = `
+                <div class="w-full max-w-sm border border-zinc-800 bg-zinc-900/60 p-6 rounded space-y-4">
+                    <div class="text-center border-b border-zinc-800 pb-3">
+                        <h4 class="font-mono text-xs font-bold text-white">Winbox - Login RouterOS</h4>
+                    </div>
+                    <div class="space-y-3 text-xs font-mono">
+                        <div class="flex items-center justify-between gap-4">
+                            <span class="text-zinc-500">Connect To:</span>
+                            <input type="text" value="192.168.88.1" disabled class="bg-black border border-zinc-800 text-white px-2 py-1 w-44 rounded text-center">
+                        </div>
+                        <div class="flex items-center justify-between gap-4">
+                            <span class="text-zinc-500">Login Name:</span>
+                            <input type="text" value="admin" disabled class="bg-black border border-zinc-800 text-white px-2 py-1 w-44 rounded text-center">
+                        </div>
+                        <div class="flex items-center justify-between gap-4">
+                            <span class="text-zinc-500">Password:</span>
+                            <input type="password" value="********" disabled class="bg-black border border-zinc-800 text-zinc-600 px-2 py-1 w-44 rounded text-center">
+                        </div>
+                    </div>
+                    <button onclick="connectWinbox()" class="w-full py-2 bg-white text-black font-mono text-[10px] font-bold tracking-widest hover:bg-zinc-200 transition mt-2">
+                        CONNECT TO ROUTER
+                    </button>
+                </div>
+            `;
+            if (graphInterval) clearInterval(graphInterval);
+        }
+
+        function switchWinboxTab(tabId) {
+            document.querySelectorAll('[id^="tab-"]').forEach(btn => {
+                btn.classList.remove('winbox-tab-active');
+            });
+            document.getElementById(`tab-${tabId}`).classList.add('winbox-tab-active');
+
+            document.querySelectorAll('[id^="content-"]').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+        }
+
+        // Live Simulated Download/Upload speeds inside Queues Tab
+        let graphInterval = null;
+        function startUptimeGraph() {
+            if (graphInterval) clearInterval(graphInterval);
+            
+            const dlVal = document.getElementById('download-speed-val');
+            const dlBar = document.getElementById('download-bar');
+            const ulVal = document.getElementById('upload-speed-val');
+            const ulBar = document.getElementById('upload-bar');
+
+            graphInterval = setInterval(() => {
+                const randomDl = (30 + Math.random() * 55).toFixed(1);
+                const randomUl = (10 + Math.random() * 35).toFixed(1);
+
+                if (dlVal && dlBar) {
+                    dlVal.textContent = `${randomDl} Mbps`;
+                    dlBar.style.width = `${randomDl}%`;
+                }
+                if (ulVal && ulBar) {
+                    ulVal.textContent = `${randomUl} Mbps`;
+                    ulBar.style.width = `${(randomUl * 2)}%`;
+                }
+            }, 1000);
+        }
+
+        // Modal Control Helper Functions
+        function showModal(modalId) {
+            const m = document.getElementById(modalId);
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        function closeModal(modalId) {
+            const m = document.getElementById(modalId);
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        function triggerZeroTierSimulation() {
+            showModal('zerotier-modal');
+        }
+
+        function runZeroTierSimulation() {
+            const seq = document.getElementById('zt-sequence');
+            seq.innerHTML = '';
+            
+            const tasks = [
+                "Inisiasi client ZeroTier...",
+                "Panggilan API: POST /controller/network/e5cd7a99af840211...",
+                "Request authorization untuk Device ID [88ef77a2]...",
+                "Mengganti status anggota: Authorized = True",
+                "Alokasi IP Virtual: 10.147.20.145",
+                "Melakukan ping tes ke 10.147.20.1...",
+                "Ping 10.147.20.1: bytes=64 time=45ms TTL=64",
+                "Koneksi terverifikasi aman & terenskripsi!"
+            ];
+
+            tasks.forEach((task, index) => {
+                setTimeout(() => {
+                    const p = document.createElement('p');
+                    p.innerHTML = `<span class="text-purple-400 font-bold">&gt;</span> ${task}`;
+                    if (index === tasks.length - 1) p.className = "text-green-400 font-bold";
+                    seq.appendChild(p);
+                    seq.scrollTop = seq.scrollHeight;
+                }, index * 800);
+            });
+        }
+
+        function triggerTunnelSimulation() {
+            showModal('tunnel-modal');
+        }
+
+        function runTunnelSimulation() {
+            const seq = document.getElementById('tunnel-sequence');
+            seq.innerHTML = '';
+
+            const logs = [
+                "$ python3 -m http.server 8000",
+                "Serving HTTP on 0.0.0.0 port 8000 (http://127.0.0.1:8000/)...",
+                "$ cloudflared tunnel create kamal-tunnel",
+                "Tunnel ID: b52e128c-7f55-4001-92be-5a113d0a92bf",
+                "$ cloudflared tunnel route dns kamal-tunnel web.kamal.me",
+                "DNS route added to web.kamal.me pointing to tunnel.",
+                "$ cloudflared tunnel run kamal-tunnel",
+                "Starting tunnel with 4 secure edge connections...",
+                "Connection 1 to SIN (Singapore) - ESTABLISHED",
+                "Connection 2 to HKG (Hong Kong) - ESTABLISHED",
+                "Situs Anda berhasil diarahkan secara global via Cloudflare Tunnel!"
+            ];
+
+            logs.forEach((log, index) => {
+                setTimeout(() => {
+                    const p = document.createElement('p');
+                    p.innerHTML = log.startsWith('$') ? `<span class="text-green-500 font-bold">$</span> ${log.slice(2)}` : `<span class="text-zinc-500">_</span> ${log}`;
+                    if (index === logs.length - 1) p.className = "text-green-400 font-bold border-t border-zinc-800 pt-2 mt-2";
+                    seq.appendChild(p);
+                    seq.scrollTop = seq.scrollHeight;
+                }, index * 700);
+            });
+        }
+
+        // Typewriter Animation logic for Hero Banner
+        const textArr = ["Junior Network Administrator", "D3-Teknik Komputer UDB", "Dapat Menggunakan Winbox", "Spesialis Virtual Jaringan"];
+        let wordIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        const typingSpeed = 100;
+        const deletingSpeed = 40;
+        const delayBetweenWords = 1500;
+
+        function typeEffect() {
+            const typingText = document.getElementById('typing-text');
+            if(!typingText) return;
+            const currentWord = textArr[wordIndex];
+            
+            if (isDeleting) {
+                typingText.textContent = currentWord.substring(0, charIndex - 1);
+                charIndex--;
+            } else {
+                typingText.textContent = currentWord.substring(0, charIndex + 1);
+                charIndex++;
+            }
+
+            if (!isDeleting && charIndex === currentWord.length) {
+                isDeleting = true;
+                setTimeout(typeEffect, delayBetweenWords);
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                wordIndex = (wordIndex + 1) % textArr.length;
+                setTimeout(typeEffect, 500);
+            } else {
+                setTimeout(typeEffect, isDeleting ? deletingSpeed : typingSpeed);
+            }
+        }
+        setTimeout(typeEffect, 1000);
+
+        // Exponential Backoff Fetch Utility
+        async function fetchWithBackoff(url, options, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.ok) return response;
+                    if (response.status === 429) {
+                        await new Promise(res => setTimeout(res, delay));
+                        delay *= 2;
+                        continue;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                } catch (e) {
+                    if (i === retries - 1) throw e;
+                    await new Promise(res => setTimeout(res, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        // STRICT Local knowledge database mapped precisely to Kamaluddin's revised CV
+        const localKnowledgeBase = [
+            { 
+                keywords: ['kemampuan', 'skill', 'keahlian', 'bisa', 'dapat', 'winbox', 'mikrotik'], 
+                response: "Kemampuan resmi Kamaluddin Haqani yang tertulis di dalam CV terbaru adalah:\n1. **Jaringan & IT Support**: MikroTik dasar, konfigurasi Winbox.\n2. **Pemrograman & Web**: HTML dasar, CSS dasar, C++ dasar, Python HTTP Server dasar.\n3. **Tools**: Microsoft Office, Canva, Cloudflare Tunnel, ZeroTier.\n4. **Soft Skills**: Memiliki komunikasi yang baik, bisa bekerja sama dengan tim, manajemen waktu." 
+            },
+            { 
+                keywords: ['proyek', 'project', 'tugas', 'praktik', 'praktikum', 'karya', 'portofolio'], 
+                response: "Berikut adalah daftar Proyek & Praktik Akademik Kamaluddin sesuai dengan CV:\n1. **Konfigurasi Jaringan MikroTik**: Mengatur profile keamanan WPA2-PSK, mode station, scan SSID, DHCP Client, DNS, NAT, dan melakukan uji ping lewat Winbox.\n2. **ZeroTier Virtual Network**: Membuat virtual network terenkripsi, authorization anggota/client, serta pengujian koneksi via IP ZeroTier.\n3. **HTTP Server & Cloudflare Tunnel**: Membuat website sederhana HTML/CSS, menjalankan local Python server, lalu mengeksposnya ke internet publik via Cloudflare Tunnel." 
+            },
+            { 
+                keywords: ['kuliah', 'universitas', 'sekolah', 'pendidikan', 'smk', 'tk', 'teknik komputer'], 
+                response: "Berdasarkan CV resmi, berikut adalah riwayat pendidikan Kamaluddin:\n1. **Universitas Duta Bangsa Surakarta** (2025 - Sekarang) - mengambil program **D3 Teknik Komputer** (Saat ini semester 3).\n2. **SMK Al Musanni Gemolong** (2021-2024) - mengambil jurusan **Teknik Kendaraan Ringan Otomotif**." 
+            },
+            { 
+                keywords: ['organisasi', 'himpunan', 'humas', 'media', 'pengalaman'], 
+                response: "Kamaluddin aktif dalam organisasi kampus di **Himpunan Mahasiswa** dan dipercaya menjadi bagian dari **Divisi Media dan Humas** selama kurang lebih satu tahun." 
+            },
+            { 
+                keywords: ['kontak', 'email', 'wa', 'whatsapp', 'alamat', 'lokasi', 'hubungi'], 
+                response: "Anda dapat menghubungi Kamaluddin Haqani secara langsung melalui kontak resmi berikut:\n- **Email**: 250104019@mhs.udb.ac.id\n- **WhatsApp / Telepon**: +62 878-6551-5963\n- **Domisili**: Tipes, Surakarta, Jawa Tengah." 
+            },
+            { 
+                keywords: ['siapa', 'biodata', 'profil', 'tentang', 'ringkasan'], 
+                response: "Kamaluddin Haqani adalah Mahasiswa semester 3 Program Studi **D3-Teknik Komputer di Universitas Duta Bangsa Surakarta** yang juga bertindak sebagai **Junior Network Administrator**. Ia memiliki pengalaman organisasi di Himpunan Mahasiswa (Divisi Media & Humas) dan memiliki keahlian operasional **Winbox MikroTik, ZeroTier, serta Cloudflare Tunnel**." 
+            }
+        ];
+
+        function getLocalResponse(query) {
+            const normalizedQuery = query.toLowerCase();
+            for (const item of localKnowledgeBase) {
+                if (item.keywords.some(k => normalizedQuery.includes(k))) {
+                    return item.response;
+                }
+            }
+            return "Maaf, pertanyaan Anda tidak terdeteksi di data CV resmi Kamaluddin. Kamaluddin Haqani adalah Mahasiswa Teknik Komputer UDB Surakarta yang memiliki kemampuan operasional **Winbox MikroTik, ZeroTier, Cloudflare Tunnel**, kerjasama tim, serta komunikasi yang baik. Hubungi langsung melalui WhatsApp: **+62 878-6551-5963**.";
+        }
+
+        async function getGeminiChatResponse(userQuery) {
+            const apiKey = ""; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            const systemPrompt = `Kamu adalah Kamaluddin Assist AI, agen virtual resmi yang menjawab pertanyaan profesional dari calon perekrut tentang Kamaluddin Haqani secara akurat berdasarkan CV berikut:
+            - Nama Lengkap: Kamaluddin Haqani
+            - Domisili: Tipes, Surakarta, Jawa Tengah, Indonesia.
+            - Kontak Resmi: Email (250104019@mhs.udb.ac.id) & WhatsApp (+62 878-6551-5963).
+            - Riwayat Pendidikan:
+              1. SMK Al Musanni Gemolong (Teknik Kendaraan Ringan Otomotif, Lulus 2024).
+              2. Universitas Duta Bangsa Surakarta (D3-Teknik Komputer, 2025-Sekarang, sedang menempuh Semester 3).
+            - Organisasi: Aktif sebagai bagian dari Divisi Media dan Humas di Himpunan Mahasiswa selama kurang lebih 1 tahun.
+            - Daftar Keahlian & Tools:
+              1. Jaringan & IT Support: MikroTik dasar, Winbox, Network Security Profile, DHCP Client, DNS, NAT, Ping test.
+              2. Pemrograman & Web: HTML dasar, CSS dasar, C++ dasar, Python HTTP Server dasar.
+              3. Tools: Microsoft Office, Canva, Cloudflare Tunnel, ZeroTier.
+              4. Soft Skills: Memiliki komunikasi yang baik, Bisa bekerja sama dengan tim, manajemen waktu.
+            - Proyek & Praktik Akademik:
+              1. Konfigurasi Jaringan MikroTik: Membuat security profile WPA2-PSK, mengatur mode station, scan SSID, menghubungkan perangkat melalui Winbox. Menambahkan DHCP Client, DNS, dan NAT untuk koneksi internet, lalu pengujian dengan ping.
+              2. ZeroTier Virtual Network: Membuat virtual network terenkripsi, otorisasi klien, dan menguji konektivitas VPN P2P dengan IP ZeroTier.
+              3. HTTP Server dan Cloudflare Tunnel: Membuat web HTML/CSS sederhana, menjalankan local Python HTTP Server, lalu menghubungkannya ke internet via Cloudflare Tunnel.
+
+            Aturan Jawaban:
+            1. Jawablah secara ramah, ringkas, dan profesional menggunakan Bahasa Indonesia yang santun.
+            2. Gunakan pemformatan bold (**) pada kata kunci penting agar mudah dibaca.
+            3. Jangan pernah menambahkan keahlian atau klaim fiktif yang tidak tertulis di atas! 
+            4. Jika pengguna menanyakan hal yang di luar ranah CV Kamaluddin, arahkan dengan sopan agar mereka menghubungi Kamaluddin secara langsung melalui kontak di atas.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                }
+            };
+
+            const response = await fetchWithBackoff(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            const textResponse = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!textResponse) throw new Error("Empty response from Gemini API");
+            return textResponse;
+        }
+
+        // AI Chatbot UI & Knowledge Engine Control
+        const chatbotToggle = document.getElementById('chatbot-toggle');
+        const chatbotWindow = document.getElementById('chatbot-window');
+        const chatbotClose = document.getElementById('chatbot-close');
+        const chatHistory = document.getElementById('chat-history');
+        const chatInput = document.getElementById('chat-input');
+        const chatSend = document.getElementById('chat-send');
+        const chatbotStatusEl = document.getElementById('chatbot-engine-status');
+
+        chatbotToggle.addEventListener('click', () => {
+            chatbotWindow.classList.toggle('hidden');
+            chatbotWindow.classList.toggle('flex');
+            if(!chatbotWindow.classList.contains('hidden')) {
+                chatInput.focus();
+            }
+        });
+
+        chatbotClose.addEventListener('click', () => {
+            chatbotWindow.classList.add('hidden');
+            chatbotWindow.classList.remove('flex');
+        });
+
+        function sendQuickMessage(text) {
+            chatInput.value = text;
+            handleChatSend();
+        }
+
+        function appendMessage(role, text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('p-2.5', 'max-w-[85%]', 'text-[11px]', 'shadow-sm', 'leading-relaxed', 'transition-all');
+            
+            if (role === 'user') {
+                msgDiv.classList.add('self-end', 'bg-white', 'text-black', 'rounded', 'font-normal');
+                msgDiv.textContent = text;
+            } else if (role === 'model') {
+                msgDiv.classList.add('self-start', 'bg-zinc-900', 'border', 'border-white/5', 'text-zinc-300', 'rounded', 'font-light');
+                msgDiv.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>')
+                                      .replace(/\n/g, '<br>');
+            } else if (role === 'loading') {
+                msgDiv.classList.add('self-start', 'bg-zinc-900/50', 'text-zinc-600', 'rounded', 'italic');
+                msgDiv.id = 'loading-indicator';
+                msgDiv.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1.5"></i> Gemini is thinking...';
+            }
+            
+            chatHistory.appendChild(msgDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        async function handleChatSend() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            chatInput.disabled = true;
+            chatSend.disabled = true;
+
+            appendMessage('user', message);
+            chatInput.value = '';
+            
+            appendMessage('loading', '');
+
+            try {
+                const reply = await getGeminiChatResponse(message);
+                
+                const loadingIndicator = document.getElementById('loading-indicator');
+                if(loadingIndicator) loadingIndicator.remove();
+                
+                chatbotStatusEl.textContent = "LIVE GEMINI API";
+                chatbotStatusEl.classList.replace('text-amber-400', 'text-green-400');
+                
+                appendMessage('model', reply);
+            } catch (error) {
+                console.warn("Real Gemini API limit or error. Falling back to secure local CV knowledge.", error);
+                
+                setTimeout(() => {
+                    const loadingIndicator = document.getElementById('loading-indicator');
+                    if(loadingIndicator) loadingIndicator.remove();
+                    
+                    chatbotStatusEl.textContent = "OFFLINE CV CACHE";
+                    chatbotStatusEl.classList.replace('text-green-400', 'text-amber-400');
+                    
+                    const localReply = getLocalResponse(message);
+                    appendMessage('model', localReply);
+                }, 500);
+            } finally {
+                chatInput.disabled = false;
+                chatSend.disabled = false;
+                chatInput.focus();
+            }
+        }
+
+        chatSend.addEventListener('click', handleChatSend);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleChatSend();
+            }
+        });
+
+        // AI Network Topology Generator logic using Imagen 4.0
+        function setTopologyPrompt(promptText) {
+            document.getElementById('topology-prompt').value = promptText;
+        }
+
+        async function generateTopology() {
+            const promptInput = document.getElementById('topology-prompt');
+            const prompt = promptInput.value.trim();
+            if (!prompt) return;
+
+            const btnGenerate = document.getElementById('btn-generate-topology');
+            const containerPlaceholder = document.getElementById('topology-placeholder');
+            const outputImg = document.getElementById('topology-img');
+            const loadingOverlay = document.getElementById('topology-loading');
+
+            btnGenerate.disabled = true;
+            loadingOverlay.classList.remove('hidden');
+            containerPlaceholder.classList.add('hidden');
+            outputImg.classList.add('hidden');
+
+            try {
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
+
+                const enhancedPrompt = `${prompt}, blueprint design style, high-tech network diagram architecture schematic, clean vector lines, isometric schematic layout, network nodes and devices icons, elegant minimalist dark palette with cyan and white accents, high resolution, sharp focus, technical digital illustration, no distorted messy text, neat schematic layout`;
+
+                const payload = {
+                    instances: [{ prompt: enhancedPrompt }],
+                    parameters: { sampleCount: 1 }
+                };
+
+                const response = await fetchWithBackoff(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
+
+                if (base64Data) {
+                    outputImg.src = `data:image/png;base64,${base64Data}`;
+                    outputImg.classList.remove('hidden');
+                } else {
+                    throw new Error("No image data returned from Imagen model.");
+                }
+            } catch (error) {
+                console.error("Imagen Generator Error:", error);
+                
+                containerPlaceholder.innerHTML = `
+                    <div class="text-center text-red-400 space-y-2 p-4">
+                        <i class="fas fa-exclamation-triangle text-2xl"></i>
+                        <p class="text-[10px] font-mono">Gagal memicu Gemini Architect Engine secara eksternal. Silakan periksa koneksi Anda atau coba lagi nanti.</p>
+                    </div>
+                `;
+                containerPlaceholder.classList.remove('hidden');
+            } finally {
+                btnGenerate.disabled = false;
+                loadingOverlay.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
